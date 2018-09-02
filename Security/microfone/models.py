@@ -1,25 +1,25 @@
-from django.contrib.contenttypes.fields \
-	import GenericForeignKey
-from django.db \
-	import models
+import os.path
 
-# Create your models here.
+from django.contrib.contenttypes.fields \
+    import GenericForeignKey
+from django.contrib.contenttypes.models \
+    import ContentType
+from django.db \
+    import models
+
+
+class GerenciadorVozUsuario(models.Manager):
+
+    def cria_voz(self, vozusuario_padrao):
+
+        complemento = self.create(
+            vozusuario_padrao = vozusuario_padrao, 
+        )
+        
+        return complemento
 
 class VozUsuario(models.Model):
 
-	vozusuario_padrao = models.ImageField(
-			width_field = imagemusuario_padrao_width,
-			height_field = imagemusuario_padrao_height,
-		)
+    vozusuario_padrao = models.FileField()
 
-	vozusuario_padrao_width = models.IntegerField(
-			default = 0
-		)
-
-	vozusuario_padrao_height = models.IntegerField(
-			default = 0
-		)
-
-	imagemusuario_vozusuario = GenericForeignKey(
-			null = True
-		)
+    objects = GerenciadorVozUsuario()

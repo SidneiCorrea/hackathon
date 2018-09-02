@@ -1,0 +1,120 @@
+{% extends 'frontend/base.html' %} {% load staticfiles %} {% load widget_tweaks %} {% block titulo %}Cadastro de Usuário{% endblock %} {% block titulo_header %}Cadastro de Usuário{% endblock %} {% block main %}
+<div class="section row">
+  <h1 class="blue-grey-text text-darken-2 center">Cadastro Next<span class="green-text">Sale</span></h1>
+  <span class="card-title blue-grey-text center">Reconhecimento <span class="blue-text">Facial</span> e <span class="amber-text text-darken-2">Vocal</span></span>
+  <div class="section">
+  <div class="col s12 l5">
+    <div class="section">
+      <img src="{% static 'images/face-recognition.png' %}" class="face-example hoverable z-depth-1 center">
+      <div class="card-panel white hoverable">
+        <span class="blue-grey-text text-lighten-2 center">Por gentileza, posicione seu rosto ao centro da camera e leia a seguinte frase em voz alta: </span>
+        <div class="card-panel white hoverable">
+            <span class="blue-text leitura">Gostaria de transferir R$500,00 para a conta de João.</span>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="col s12 l7">
+    <form>
+      {% csrf_token %}
+      <div class="row blue-grey-text text-darken-2">
+        <div id="container" class="col s12">
+          <video autoplay="true" id="videoElement" class="z-depth-1 hoverable pulse">
+          </video>
+        </div>
+      </div>
+    </form>  
+  </div>
+  <div class="col s12 center">
+    <button id="gravador" class="btn waves-effect waves-red white red-text">
+        <div class="valign-wrapper">
+            Preencher com Voz<i class="material-icons right">mic</i>
+        </div>
+    </button>
+  </div>
+</div>
+{% endblock %}   
+{% block javascript %}
+    <script type="text/javascript">
+      var video = document.querySelector("#videoElement");
+
+      $(document).ready(function() {
+        console.log("document_ready");
+        start_camera();
+      });
+
+      $("#gravador").mousedown(function () {
+        var url = "{% url 'antifraude:AjaxGravaAudio' %}"
+        var audio = $("#audio").html();
+
+        var webaudio_tooling_obj = function () {
+
+          var audioContext = new AudioContext();
+
+          if (!navigator.getUserMedia)
+            navigator.getUserMedia = navigator.getUserMedia || navigator.webkitGetUserMedia ||
+              navigator.mozGetUserMedia || navigator.msGetUserMedia;
+          if (navigator.getUserMedia){
+              navigator.getUserMedia({audio:true}, 
+                function(stream) {
+                  console.log("Gravando");
+                },
+                function(e) {
+                  console.log('Erro ao gravar audio.');
+                }
+              );
+          } else { alert('getUserMedia não é suportado neste navegador.'); }
+        }();
+
+        $.ajax({
+          url: url,
+          data: {
+            "audio" : audio
+          },
+          beforeSend: function() {
+            stop_camera();
+          },
+          success: function (data) {
+            console.log("Gravando o audio.");
+          }
+        });
+      }).mouseup(function () {
+        var url = "{% url 'antifraude:AjaxSalvaAudio' %}"
+        var audio = $("#audio").html();
+  
+        $.ajax({
+          url: url,
+          data: {
+            "audio" : audio
+          },
+          success: function (data) {
+            console.log("Salvou");
+            $("#audio").html(data);
+            start_camera();
+          },
+        });
+      });
+
+      function start_camera() {
+        if (navigator.mediaDevices.getUserMedia) {
+          navigator.mediaDevices.getUserMedia({ video: true })
+            .then(function(stream) {
+              video.srcObject = stream;
+            })
+            .catch(function(err0r) {
+            });
+        }  
+      }
+
+      function stop_camera() {
+        let stream = video.srcObject;
+        let tracks = stream.getTracks();
+      
+        tracks.forEach(function(track) {
+          track.stop();
+          console.log("Track Stream!");
+        });
+      }
+
+    </script>
+    {% endblock %}    

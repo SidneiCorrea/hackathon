@@ -1,45 +1,147 @@
-<!DOCTYPE html>
-<html>
-<head>
-<meta charset="utf-8">
-<meta content="stuff, to, help, search, engines, not" name="keywords">
-<meta content="What this page is about." name="description">
-<meta content="Display Webcam Stream" name="title">
-<title>Display Webcam Stream</title>
-  
-<style>
-#container {
-    margin: 0px auto;
-    width: 500px;
-    height: 375px;
-    border: 10px #333 solid;
-}
-#videoElement {
-    width: 500px;
-    height: 375px;
-    background-color: #666;
-}
-</style>
-</head>
-  
-<body>
-<div id="container">
-    <video autoplay="true" id="videoElement">
-     
-    </video>
+{% extends 'frontend/base.html' %}
+{% load staticfiles %}
+{% load widget_tweaks %}
+
+{% block titulo %}Cadastro de Usuário{% endblock %} 
+
+{% block titulo_header %}Cadastro de Usuário{% endblock %}
+
+{% block main %}
+<h1 class="blue-grey-text text-darken-2 center">Transferência</h1>
+<span class="card-title blue-grey-text center">Camada de segurança Next<span class="green-text">Sales</span></span>
+<div class="section row">
+    <div class="col s12 l4">
+        <div id="container">
+            <video autoplay="true" id="videoElement" class="z-depth-1 hoverable">
+            </video>                  
+        </div>
+        <button id="gravador" class="btn waves-effect waves-red white red-text">
+            <div class="valign-wrapper">
+                Preencher com Voz<i class="material-icons right">mic</i>
+            </div>
+        </button>
+        <div id="transacao" class="col s12">
+            Tempo de gravação: <span class="left" id="contador_tempo"></span>
+        </div>
+    </div>
+    <div class="col s12 l8">
+        <form id="form">
+            {% csrf_token %}
+            <div class="row blue-grey-text text-darken-2">
+                <div class="input-field col s6">
+                    <i class="material-icons prefix">home</i>
+                    <input id="cooperativa" placeholder="Cooperativa da conta destino" type="text" class="validate" value="" readonly="True">
+                    <label for="cooperativa">Cooperativa</label>
+                </div>
+                <div class="input-field col s6">
+                    <i class="material-icons prefix">receipt</i>
+                    <input id="conta" placeholder="Cooperativa da conta destino" type="text" class="validate" value="" readonly="True">
+                    <label for="nr_conta">Conta/DV Destino</label>
+                </div>
+                <div class="input-field col s12">
+                    <i class="material-icons prefix">attach_money</i>
+                    <input id="valor" placeholder="Valor da Transação" type="text" class="validate" value="" readonly="True">
+                    <label for="valor">Valor</label>
+                </div>
+                <div class="input-field col s12">
+                    <i class="material-icons prefix">event</i>
+                    <input id="data" type="text" class="datepicker">
+                    <label for="data">Data de Transferência</label>
+                </div>
+                <div class="section col s12">
+                    <button type="reset" class="btn white red-text text-lighten-2 left">Limpar</button>
+                    <button type="submit" class="btn white green-text right">Confirmar Transferência</button>
+                </div>
+            </div>
+        </form>
+    </div>
 </div>
-<script>
-var video = document.querySelector("#videoElement");
- 
-if (navigator.mediaDevices.getUserMedia) {       
-    navigator.mediaDevices.getUserMedia({video: true})
-  .then(function(stream) {
-    video.srcObject = stream;
-  })
-  .catch(function(err0r) {
-    console.log("Something went wrong!");
-  });
-}
-</script>
-</body>
-</html>
+{% endblock %}
+{% block javascript %}
+    <script type="text/javascript">
+      var video = document.querySelector("#videoElement");
+
+      $(document).ready(function() {
+        console.log("document_ready");
+        start_camera();
+      });
+
+      $("#gravador").mousedown(function () {
+        var url = "{% url 'antifraude:AjaxGravaAudio' %}"
+        var audio = $("#audio").html();
+
+        var webaudio_tooling_obj = function () {
+
+          var audioContext = new AudioContext();
+
+          if (!navigator.getUserMedia)
+            navigator.getUserMedia = navigator.getUserMedia || navigator.webkitGetUserMedia ||
+              navigator.mozGetUserMedia || navigator.msGetUserMedia;
+          if (navigator.getUserMedia){
+              navigator.getUserMedia({audio:true}, 
+                function(stream) {
+                  console.log("Gravando");
+                },
+                function(e) {
+                  console.log('Erro ao gravar audio.');
+                }
+              );
+          } else { alert('getUserMedia não é suportado neste navegador.'); }
+        }();
+
+        $.ajax({
+          url: url,
+          data: {
+            "audio" : audio
+          },
+          beforeSend: function() {
+            stop_camera();
+          },
+          success: function (data) {
+            console.log("Gravando o audio.");
+          }
+        });
+      }).mouseup(function () {
+        var url = "{% url 'antifraude:AjaxSalvaAudio' %}"
+        var audio = $("#audio").html();
+        
+        $.ajax({
+          url: url,
+          data: {
+            "audio" : audio
+          },
+          success: function (data) {
+            console.log("Salvou");
+            $("#cooperativa").val("Cecred");
+            $("#conta").val("2552552525");
+            $("#valor").val("R$500.00");
+            $("#data").val("02/09/2018");
+            $("#audio").html(data);
+            start_camera();
+          },
+        });
+      });
+
+      function start_camera() {
+        if (navigator.mediaDevices.getUserMedia) {
+          navigator.mediaDevices.getUserMedia({ video: true })
+            .then(function(stream) {
+              video.srcObject = stream;
+            })
+            .catch(function(err0r) {
+            });
+        }  
+      }
+
+      function stop_camera() {
+        let stream = video.srcObject;
+        let tracks = stream.getTracks();
+      
+        tracks.forEach(function(track) {
+          track.stop();
+          console.log("Track Stream!");
+        });
+      }
+
+    </script>
+    {% endblock %}

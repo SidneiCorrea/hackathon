@@ -1,0 +1,112 @@
+{% load staticfiles %}
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1">
+    <meta content="voz, camera, watson, ibm, transação" name="keywords">
+    <meta content="What this page is about." name="description">
+    <meta content="Display Webcam Stream" name="title">
+    <link rel="stylesheet" type="text/css" href="{% static 'materialize/css/materialize.css' %}">
+    <link rel="stylesheet" type="text/css" href="{% static 'materialize/css/custom.css' %}">
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons"rel="stylesheet">
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+    <title>{% block titulo_header %}Formulário antifraude{% endblock %}</title>
+  </head>
+  
+  <body class="blue-grey lighten-5">
+    <nav class="navbar-external">
+      <div class="nav-wrapper">
+        <div class="container">
+          <a href="{% url 'frontend:FaceCreateView' %}" class="brand-logo left">Next<span class="green-text">Sale</span></a>
+          <ul id="nav-mobile" class="right hide-on-med-and-down">
+            <li><a href="{% url 'frontend:AntiFraudeCreateView' %}"><i class="material-icons">compare_arrows</i></a></li>
+            <li><a href="{% url 'frontend:FaceCreateView' %}"><i class="material-icons">faceadd</i></a></li>
+          </ul>
+        </div>
+      </div>
+    </nav>
+    <div class="container section">
+      <div class="row">
+        <div class="col s12">
+          <div class="card white hoverable">
+            <div class="card-content white-text">
+              {% block main %}
+              {% endblock %}
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="row">
+      </div>
+    </div>  
+  <script src="{% static 'materialize/js/jquery.js' %}"></script>
+  <script type="text/javascript" src="{% static 'materialize/js/materialize.js' %}"></script>
+  <script type="text/javascript" src="{% static 'materialize/js/countUp.js' %}"></script>
+    {% block javascript %}
+    {% endblock %}
+    <script>
+      $(document).ready(function(){
+
+        var ptbr = {
+             months:[
+            'Janeiro',
+            'Fevereiro',
+            'Março',
+            'Abril',
+            'Maio',
+            'Junho',
+            'Julho',
+            'Agosto',
+            'Setembro',
+            'Outubro',
+            'Novembro',
+            'Dezembro'
+          ],
+          monthsShort:[
+              'Jan',
+              'Fev',
+              'Mar',
+              'Abr',
+              'Mai',
+              'Jun',
+              'Jul',
+              'Ago',
+              'Set',
+              'Out',
+              'Nov',
+              'Dez'
+            ],
+            weekdays:[
+              'Domingo',
+              'Segunda-Feira',
+              'Terça-Feira',
+              'Quarta-Feira',
+              'Quinta-Feira',
+              'Sexta-Feira',
+              'Sábado'
+            ],
+            weekdaysShort:[
+              'Dom',
+              'Seg',
+              'Ter',
+              'Qua',
+              'Qui',
+              'Sex',
+              'Sáb'
+            ],
+            weekdaysAbbrev :['D','S','T','Q','Q','S','S'],
+            cancel:"Cancelar"
+          };
+        $('.datepicker').datepicker({
+          format: "dd/mm/yyyy",
+          autoClose: true,
+          minDate: new Date(1940,0,1),
+          yearRange: 80,
+          maxDate: new Date(2025,0,1),
+          i18n: ptbr,
+        });
+      });
+    </script>
+  </body>
+</html>
